@@ -173,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   textAlign: TextAlign.center,
                 ),
                 if (_showQuestions) ...[
-                  const SizedText(
+                  const Text(
                     'Fairway in regulation?',
                   ),
                   Row(
