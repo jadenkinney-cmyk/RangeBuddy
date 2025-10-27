@@ -175,32 +175,34 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (_showQuestions) ...[
                   const Text(
                     'Fairway in regulation?',
+                    style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.check_circle, color: Colors.green),
+                        icon: Icon(Icons.check_circle, color: Colors.green, size: 48),
                         onPressed: () => _updateFairway(true),
                       ),
                       IconButton(
-                        icon: Icon(Icons.cancel, color: Colors.red),
+                        icon: Icon(Icons.cancel, color: Colors.red, size: 48),
                         onPressed: () => _updateFairway(false),
                       ),
                     ],
                   ),
-                  const SizedText(
+                  const Text(
                     'Green in regulation?',
+                    style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.check_circle, color: Colors.green),
+                        icon: Icon(Icons.check_circle, color: Colors.green, size: 48),
                         onPressed: () => _updateGreen(true),
                       ),
                       IconButton(
-                        icon: Icon(Icons.cancel, color: Colors.red),
+                        icon: Icon(Icons.cancel, color: Colors.red, size: 48),
                         onPressed: () => _updateGreen(false),
                       ),
                     ],
