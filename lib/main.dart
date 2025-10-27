@@ -16,12 +16,12 @@ class RangeBuddyApp extends StatelessWidget {
         brightness: Brightness.light,
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.green[50],
-        textTheme: const TextTheme(
+        textTheme: TextTheme(
           bodyLarge: TextStyle(fontSize: 24.0), // Bigger font for main text
           bodyMedium: TextStyle(fontSize: 20.0),
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.green[700],
+          backgroundColor: Color.fromARGB(255, 70, 180, 76),
           titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
         ),
       ),
@@ -29,12 +29,12 @@ class RangeBuddyApp extends StatelessWidget {
         brightness: Brightness.dark,
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.grey[900],
-        textTheme: const TextTheme(
+        textTheme: TextTheme(
           bodyLarge: TextStyle(fontSize: 24.0, color: Colors.white), // Bigger font in dark mode
           bodyMedium: TextStyle(fontSize: 20.0, color: Colors.white70),
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.green[900],
+          backgroundColor: Color.fromARGB(255, 23, 88, 28),
           titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
@@ -66,10 +66,10 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class MyHomePageState extends State<MyHomePage> {
   String _holeInfo = 'Press Generate to start!';
   List<HoleInfo> _holeHistory = [];
   bool _showQuestions = false;
@@ -173,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   textAlign: TextAlign.center,
                 ),
                 if (_showQuestions) ...[
-                  const Text(
+                  Text(
                     'Fairway in regulation?',
                     style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                   ),
@@ -181,16 +181,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.check_circle, color: Colors.green, size: 48),
+                        icon: const Icon(Icons.check_circle, color: Colors.green, size: 48),
                         onPressed: () => _updateFairway(true),
                       ),
                       IconButton(
-                        icon: Icon(Icons.cancel, color: Colors.red, size: 48),
+                        icon: const Icon(Icons.cancel, color: Colors.red, size: 48),
                         onPressed: () => _updateFairway(false),
                       ),
                     ],
                   ),
-                  const Text(
+                  Text(
                     'Green in regulation?',
                     style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                   ),
@@ -198,11 +198,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.check_circle, color: Colors.green, size: 48),
+                        icon: const Icon(Icons.check_circle, color: Colors.green, size: 48),
                         onPressed: () => _updateGreen(true),
                       ),
                       IconButton(
-                        icon: Icon(Icons.cancel, color: Colors.red, size: 48),
+                        icon: const Icon(Icons.cancel, color: Colors.red, size: 48),
                         onPressed: () => _updateGreen(false),
                       ),
                     ],
