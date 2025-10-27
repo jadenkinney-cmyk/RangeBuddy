@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 void main() {
@@ -79,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _generateHole() {
     if (_showQuestions && _holeHistory.isNotEmpty) {
-      setState() {
+      setState(() {
         _holeHistory[_holeHistory.length - 1] = HoleInfo(
           yardage: _holeHistory[_holeHistory.length - 1].yardage,
           par: _holeHistory[_holeHistory.length - 1].par,
@@ -112,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
     String direction = directions[random.nextInt(directions.length)];
     int greenDiameter = random.nextInt(21) + 10; // 10-30 yards
 
-    setState() {
+    setState(() {
       _holeInfo = 'Yardage: $yardage yards\nDirection: $direction\nPar: $par\nGreen Diameter: $greenDiameter yards';
       _holeHistory.add(HoleInfo(yardage: yardage, par: par, direction: direction, greenDiameter: greenDiameter));
       if (_holeHistory.length > 10) {
@@ -125,13 +124,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _updateFairway(bool value) {
-    setState() {
+    setState(() {
       _fairwayInRegulation = value;
     });
   }
 
   void _updateGreen(bool value) {
-    setState() {
+    setState(() {
       _greenInRegulation = value;
     });
   }
