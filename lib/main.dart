@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const RangeBuddyApp());
@@ -17,11 +18,11 @@ class RangeBuddyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.green[50],
         textTheme: TextTheme(
-          bodyLarge: TextStyle(fontSize: 24.0), // Bigger font for main text
+          bodyLarge: TextStyle(fontSize: 24.0),
           bodyMedium: TextStyle(fontSize: 20.0),
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color.fromARGB(255, 70, 180, 76),
+          backgroundColor: Color.fromARGB(255, 56, 142, 60),
           titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
         ),
       ),
@@ -30,16 +31,52 @@ class RangeBuddyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.grey[900],
         textTheme: TextTheme(
-          bodyLarge: TextStyle(fontSize: 24.0, color: Colors.white), // Bigger font in dark mode
+          bodyLarge: TextStyle(fontSize: 24.0, color: Colors.white),
           bodyMedium: TextStyle(fontSize: 20.0, color: Colors.white70),
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color.fromARGB(255, 23, 88, 28),
+          backgroundColor: Color.fromARGB(255, 27, 94, 32),
           titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
-      themeMode: ThemeMode.system, // System dark mode toggle
-      home: const MyHomePage(),
+      themeMode: ThemeMode.system,
+      home: const StartScreen(),
+    );
+  }
+}
+
+class StartScreen extends StatelessWidget {
+  const StartScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.green[700],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'RangeBuddy',
+              style: TextStyle(fontSize: 48.0, color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyHomePage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+              ),
+              child: const Text('Start Round', style: TextStyle(fontSize: 24.0)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -62,6 +99,20 @@ class HoleInfo {
   });
 }
 
+class RoundInfo {
+  final String date;
+  final String time;
+  final double fairwayPercent;
+  final double greenPercent;
+
+  RoundInfo({
+    required this.date,
+    required this.time,
+    required this.fairwayPercent,
+    required this.greenPercent,
+  });
+}
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
@@ -72,6 +123,7 @@ class MyHomePage extends StatefulWidget {
 class MyHomePageState extends State<MyHomePage> {
   String _holeInfo = 'Press Generate to start!';
   List<HoleInfo> _holeHistory = [];
+  List<RoundInfo> _previousRounds = [];
   bool _showQuestions = false;
   bool _fairwayInRegulation = false;
   bool _greenInRegulation = false;
@@ -93,6 +145,11 @@ class MyHomePageState extends State<MyHomePage> {
       _greenInRegulation = false;
     }
 
+    if (_holeHistory.length >= 18) {
+      _endRound();
+      return;
+    }
+
     final random = Random();
     int yardage = random.nextInt(451) + 100; // 100-550 yards
     int par;
@@ -107,20 +164,60 @@ class MyHomePageState extends State<MyHomePage> {
     } else {
       par = 5;
     }
-    List<String> directions = ['Straight', 'Dogleg Left', 'Dogleg Right', 'Double Dogleg'];
+    List<String> directions = ['Straight', 'Dogleg Left', 'Dogleg Right'];
     String direction = directions[random.nextInt(directions.length)];
     int greenDiameter = random.nextInt(21) + 10; // 10-30 yards
 
     setState(() {
       _holeInfo = 'Yardage: $yardage yards\nDirection: $direction\nPar: $par\nGreen Diameter: $greenDiameter yards';
       _holeHistory.add(HoleInfo(yardage: yardage, par: par, direction: direction, greenDiameter: greenDiameter));
-      if (_holeHistory.length > 10) {
-        _holeHistory = _holeHistory.sublist(_holeHistory.length - 10);
+      if (_holeHistory.length > 18) {
+        _holeHistory = _holeHistory.sublist(_holeHistory.length - 18);
       }
       if (_holeHistory.length > 1) {
         _showQuestions = true;
       }
     });
+  }
+
+  void _endRound() {
+    double fairwayPercent = _holeHistory.isEmpty
+        ? 0.0
+        : (_holeHistory.where((hole) => hole.fairwayInRegulation).length / _holeHistory.length) * 100;
+    double greenPercent = _holeHistory.isEmpty
+        ? 0.0
+        : (_holeHistory.where((hole) => hole.greenInRegulation).length / _holeHistory.length) * 100;
+    String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    String time = DateFormat('HH:mm').format(DateTime.now());
+
+    setState(() {
+      _previousRounds.add(RoundInfo(
+        date: date,
+        time: time,
+        fairwayPercent: fairwayPercent,
+        greenPercent: greenPercent,
+      ));
+      if (_previousRounds.length > 10) {
+        _previousRounds = _previousRounds.sublist(_previousRounds.length - 10);
+      }
+      _holeHistory = [];
+      _holeInfo = 'Press Generate to start!';
+      _showQuestions = false;
+    });
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Round Recap'),
+        content: Text('Fairways Hit: ${fairwayPercent.toStringAsFixed(2)}%\nGreens Hit: ${greenPercent.toStringAsFixed(2)}%'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _updateFairway(bool value) {
@@ -150,6 +247,15 @@ class MyHomePageState extends State<MyHomePage> {
               );
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.scoreboard),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PreviousRoundsPage(previousRounds: _previousRounds)),
+              );
+            },
+          ),
         ],
       ),
       body: GestureDetector(
@@ -158,6 +264,11 @@ class MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => HoleHistoryPage(holeHistory: _holeHistory)),
+            );
+          } else if (details.primaryVelocity! > 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PreviousRoundsPage(previousRounds: _previousRounds)),
             );
           }
         },
@@ -180,13 +291,19 @@ class MyHomePageState extends State<MyHomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.check_circle, color: Colors.green, size: 48),
-                        onPressed: () => _updateFairway(true),
+                      Opacity(
+                        opacity: _fairwayInRegulation ? 1.0 : 0.5,
+                        child: IconButton(
+                          icon: const Icon(Icons.check_circle, color: Colors.green, size: 48),
+                          onPressed: () => _updateFairway(true),
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.cancel, color: Colors.red, size: 48),
-                        onPressed: () => _updateFairway(false),
+                      Opacity(
+                        opacity: _fairwayInRegulation ? 0.5 : 1.0,
+                        child: IconButton(
+                          icon: const Icon(Icons.cancel, color: Colors.red, size: 48),
+                          onPressed: () => _updateFairway(false),
+                        ),
                       ),
                     ],
                   ),
@@ -197,13 +314,19 @@ class MyHomePageState extends State<MyHomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.check_circle, color: Colors.green, size: 48),
-                        onPressed: () => _updateGreen(true),
+                      Opacity(
+                        opacity: _greenInRegulation ? 1.0 : 0.5,
+                        child: IconButton(
+                          icon: const Icon(Icons.check_circle, color: Colors.green, size: 48),
+                          onPressed: () => _updateGreen(true),
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.cancel, color: Colors.red, size: 48),
-                        onPressed: () => _updateGreen(false),
+                      Opacity(
+                        opacity: _greenInRegulation ? 0.5 : 1.0,
+                        child: IconButton(
+                          icon: const Icon(Icons.cancel, color: Colors.red, size: 48),
+                          onPressed: () => _updateGreen(false),
+                        ),
                       ),
                     ],
                   ),
@@ -218,6 +341,17 @@ class MyHomePageState extends State<MyHomePage> {
         tooltip: 'Generate Hole',
         child: const Icon(Icons.golf_course),
       ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            TextButton(
+              onPressed: _endRound,
+              child: const Text('End Round', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -231,7 +365,7 @@ class HoleHistoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Previous Holes'),
+        title: const Text('Current Round'),
       ),
       body: GestureDetector(
         onHorizontalDragEnd: (details) {
@@ -243,14 +377,51 @@ class HoleHistoryPage extends StatelessWidget {
           itemCount: holeHistory.length,
           itemBuilder: (context, index) {
             final hole = holeHistory[index];
-            return ListTile(
-              title: Text('Hole ${index + 1}'),
-              subtitle: Text(
-                'Yardage: ${hole.yardage} yards\nDirection: ${hole.direction}\nPar: ${hole.par}\nGreen Diameter: ${hole.greenDiameter} yards\nFairway in regulation: ${hole.fairwayInRegulation ? 'Yes' : 'No'}\nGreen in regulation: ${hole.greenInRegulation ? 'Yes' : 'No'}',
+            return Card(
+              elevation: 4.0,
+              margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: ListTile(
+                title: Text('Hole ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(
+                  'Yardage: ${hole.yardage} yards\nDirection: ${hole.direction}\nPar: ${hole.par}\nGreen Diameter: ${hole.greenDiameter} yards\nFairway in regulation: ${hole.fairwayInRegulation ? 'Yes' : 'No'}\nGreen in regulation: ${hole.greenInRegulation ? 'Yes' : 'No'}',
+                  style: const TextStyle(fontSize: 16.0),
+                ),
               ),
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class PreviousRoundsPage extends StatelessWidget {
+  final List<RoundInfo> previousRounds;
+
+  const PreviousRoundsPage({super.key, required this.previousRounds});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Previous Rounds'),
+      ),
+      body: ListView.builder(
+        itemCount: previousRounds.length,
+        itemBuilder: (context, index) {
+          final round = previousRounds[index];
+          return Card(
+            elevation: 4.0,
+            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            child: ListTile(
+              title: Text('Round ${index + 1} - ${round.date} at ${round.time}'),
+              subtitle: Text(
+                'Fairways Hit: ${round.fairwayPercent.toStringAsFixed(2)}%\nGreens Hit: ${round.greenPercent.toStringAsFixed(2)}%',
+                style: const TextStyle(fontSize: 16.0),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
